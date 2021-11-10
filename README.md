@@ -1,2 +1,1 @@
-# portscanner
-A simple port scanner built using kotlin
+A simple command-line application.
