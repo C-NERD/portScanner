@@ -1,26 +1,50 @@
-import 'dart:io';
-import 'package:args/args.dart';
+import "dart:io";
+import "package:args/args.dart";
+import "package:interact/interact.dart";
 
-void scan(String domain, int start, int end) async {
+void scan(String domain, int start, int end, {int delay = 0, int timeout = 2}) async {
 
 	print("scanning port range [$start .. $end] of $domain ...");
-	int opennedPorts = 0;
+
+  if (start > end){
+
+    throw ArgumentError("start port $start is greater than end port $end");
+  }
+
+  List<int> opennedPorts = [];
+  int totalOpennedPorts = 0;
+  int rangeEnd = end - start;
+
+  final progress = Progress(
+    length: rangeEnd,
+    size: 0.5,//100 / (end - start),
+    rightPrompt: (current) => " ${(current + start).toString().padLeft(3)}/$end",
+  ).interact();
+
 	for (int port = start; port <= end; port++) {
 
-	  	try{
+	  try{
 
-			final socket = await Socket.connect(domain, port);
+			final socket = await Socket.connect(domain, port, timeout : Duration(seconds : timeout));
 			socket.destroy();
 
-			print('Port $port Openned');
-			opennedPorts = opennedPorts + 1;
-	  	}on SocketException{
+      opennedPorts.add(port);
+			totalOpennedPorts = totalOpennedPorts + 1;
+	  }on SocketException{
 
-			// print('Port $port Closed');
-	  	}
+			// print("Port $port Closed");
+	  }
+
+    if (delay > 0){
+
+      await Future.delayed(Duration(seconds : delay));
+    }
+    progress.increase(1);
 	}
 
-	print('Found $opennedPorts ports');
+  progress.done();
+	print("Found $totalOpennedPorts ports");
+  print("Ports $opennedPorts are Openned");
 }
 
 void main(List<String> arguments) {
@@ -55,7 +79,33 @@ void main(List<String> arguments) {
 				}
 			}
 		})
-		..addOption("domain", abbr : "d", help : "domain name to be scanned");
+    ..addOption("delay", abbr : "d", help : "number of seconds to wait between port scanning", defaultsTo : "0", callback : (String? val) => {
+
+			if (val != null){
+
+				if (int.parse(val) < 0){
+
+					throw IndexError(int.parse(val), 600)
+				}else if(int.parse(val) > 600 /*must be less than 10 minutes or 600 seconds*/){
+
+          throw IndexError(int.parse(val), 600)
+        }
+			}
+		})
+    ..addOption("timeout", abbr : "t", help : "number of seconds to wait for an irresponsive port", defaultsTo : "2", callback : (String? val) => {
+
+			if (val != null){
+
+				if (int.parse(val) < 2){
+
+					throw IndexError(int.parse(val), 20)
+				}else if(int.parse(val) > 20 /*must be less than 10 minutes or 600 seconds*/){
+
+          throw IndexError(int.parse(val), 20)
+        }
+			}
+		})
+		..addOption("domain", help : "domain name to be scanned");
 	
 	var argsResult = parser.parse(arguments);
 	if (argsResult.arguments.isEmpty){
@@ -71,5 +121,11 @@ void main(List<String> arguments) {
 		exit(-1);
 	}
 	
-  	scan(argsResult["domain"], int.parse(argsResult["start"]), int.parse(argsResult["end"]));
+  	scan(
+      argsResult["domain"], 
+      int.parse(argsResult["start"]), 
+      int.parse(argsResult["end"]), 
+      delay : int.parse(argsResult["delay"]),
+      timeout : int.parse(argsResult["timeout"])
+    );
 }
