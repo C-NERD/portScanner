@@ -1,17 +1,7 @@
 ## Port Scanner
 
-My first dart program, a port scanning cli program
+Cmdline port scanner
 
-## Compile
+## Help
 
-To compile run the following code snippet from the root directory
-```bash
-dart compile bin/portscanner.dart
-```
-
-## Scanning Ports
-
-This is the standard way of using the tool
-```bash
-./bin/portscanner urlofsitetoscan startingport endingport
-```
+Use the --help or -h flag to print the help message.
