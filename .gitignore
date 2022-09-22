@@ -5,5 +5,5 @@
 # Conventional directory for build output.
 build/
 
-# program executable
-bin/portscanner.exe
+# all executable files
+*.exe
