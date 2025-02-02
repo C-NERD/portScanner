@@ -1,0 +1,18 @@
+[project]
+name = "portscanner"
+version = "0.1.0"
+description = "network port scanner"
+authors = [
+    {name = "CNERD",email = "cnerd694@gmail.com"}
+]
+license = {text = "Proprietary"}
+readme = "README.md"
+requires-python = "3.9.19"
+dependencies = [
+    "cyclopts (>=3.4.1,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

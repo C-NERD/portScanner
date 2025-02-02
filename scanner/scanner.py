@@ -15,13 +15,17 @@ class Scanner:
 
             self.__proto = Protocol.TCP
 
-        self.host = host
+        self.host : str = host
 
     def validate_start_stop(self, start : int, stop : int):
 
         if start > stop:
 
             raise IndexError("start is greater than stop")
+
+        elif start == 0:
+
+            raise ValueError("start must not be zero")
 
         elif start < 0:
 
@@ -40,12 +44,18 @@ class Scanner:
             try:
                 
                 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM, self.__proto.value)
+                sock.settimeout(5.0)
                 sock.connect((self.host, i))
                 sock.close()
                 yield i
 
             except ConnectionRefusedError:
 
+                continue
+
+            except (TimeoutError, socket.timeout):
+
+                logging.error(f"timeout when scanning port {i}")
                 continue
 
     #def __def__(self):

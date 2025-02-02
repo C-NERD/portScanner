@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import cyclopts, logging
 from typing import Literal
 import scanner.scanner as scanner
@@ -8,7 +9,7 @@ app = cyclopts.App()
 @app.command
 def scan(
     host: str = "localhost",
-    start : int = 0,
+    start : int = 1,
     stop : int = 500,
     protocol : Literal["TCP", "UDP"] = "TCP"
 ):
@@ -27,13 +28,13 @@ def scan(
     """
     if protocol == "TCP":
 
-        protocol = scanner.Protocol.TCP
+        enum_protocol = scanner.Protocol.TCP
 
     elif protocol == "UDP":
 
-        protocol = scanner.Protocol.UDP
+        enum_protocol = scanner.Protocol.UDP
 
-    scan_obj = scanner.Scanner(host, protocol)
+    scan_obj = scanner.Scanner(host, enum_protocol)
     logging.debug("scanning for openned ports...")
     for port in scan_obj.scan(start, stop):
 
